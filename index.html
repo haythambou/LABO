@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LABO DJ - Professional Virtual DJ Controller</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts for ultra-premium digital hardware feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Audio Context Activation Splash (Required by Browsers) -->
+  <div id="welcome-screen" class="welcome-overlay">
+    <div class="welcome-card">
+      <div class="welcome-logo">LABO DJ</div>
+      <p class="welcome-desc">A premium virtual DJ controller mimicking hardware gear. Experience real-time mixing, scratching, EQing, and filtering directly in your browser.</p>
+      <div class="welcome-loader">
+        <span>Initializing Sound Engine...</span>
+      </div>
+      <button id="start-dj-btn" class="welcome-btn">ACTIVATE SYSTEM</button>
+      <div class="welcome-note">Uses Web Audio API. Best experienced on Desktop with headphones or speakers.</div>
+    </div>
+  </div>
+
+  <div class="dj-container">
+    <!-- TOP CONTROL & DISPLAY BAR -->
+    <header class="dj-header">
+      <div class="logo-area">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">LABO <span class="logo-sub">SYSTEMS</span></span>
+      </div>
+
+      <!-- MAIN PARALLEL WAVEFORMS -->
+      <div class="waveform-monitor">
+        <div class="waveform-wrapper">
+          <canvas id="parallel-waveforms"></canvas>
+          <div class="playhead-center-line"></div>
+          <div class="waveform-markers">
+            <span class="marker-label left">DECK A</span>
+            <span class="marker-label center">BEAT MATCH</span>
+            <span class="marker-label right">DECK B</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="global-controls">
+        <div class="master-knob-container">
+          <div class="knob-label">MASTER VOL</div>
+          <div class="knob-wrapper" data-control="master-volume">
+            <div class="knob" id="master-vol-knob" style="transform: rotate(0deg);"></div>
+          </div>
+          <div class="knob-value" id="master-vol-val">70%</div>
+        </div>
+
+        <button class="menu-btn" id="shortcuts-toggle-btn" title="Keyboard Shortcuts">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 3H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-3h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
+          </svg>
+          <span>KEY MAP</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CORE HARDWARE CHASSIS -->
+    <main class="dj-hardware">
+
+      <!-- LEFT DECK (DECK A) -->
+      <section class="deck deck-a" id="deck-a-container">
+        <!-- Deck Header Status -->
+        <div class="deck-display">
+          <div class="track-meta">
+            <div class="track-title" id="deck-a-title">Load a Track...</div>
+            <div class="track-artist" id="deck-a-artist">Deck A</div>
+          </div>
+          <div class="digital-readout">
+            <div class="readout-item">
+              <span class="readout-title">BPM</span>
+              <span class="readout-val" id="deck-a-bpm">128.00</span>
+            </div>
+            <div class="readout-item">
+              <span class="readout-title">TIME</span>
+              <span class="readout-val font-mono" id="deck-a-time">00:00.0</span>
+            </div>
+            <div class="readout-item">
+              <span class="readout-title">PITCH</span>
+              <span class="readout-val font-mono" id="deck-a-pitch-val">+0.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="deck-deck-controls">
+          <!-- Jog Wheel Platter Area -->
+          <div class="jog-wheel-outer">
+            <div class="jog-wheel" id="jog-wheel-a">
+              <div class="jog-vinyl-lines"></div>
+              <div class="jog-center">
+                <div class="jog-marker" id="jog-marker-a"></div>
+                <div class="jog-center-display">
+                  <div class="jog-bpm-sub" id="jog-a-bpm-readout">128</div>
+                  <div class="jog-deck-id">A</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pitch Fader & Key Lock Section -->
+          <div class="pitch-column">
+            <div class="keylock-btn-container">
+              <button class="keylock-btn" id="deck-a-keylock" title="Key Lock / Master Tempo">MT</button>
+            </div>
+            <div class="pitch-fader-container">
+              <div class="pitch-scale">
+                <span>+8</span>
+                <span>+4</span>
+                <span>0</span>
+                <span>-4</span>
+                <span>-8</span>
+              </div>
+              <div class="fader-track">
+                <input type="range" id="deck-a-pitch" class="pitch-fader-input" min="-8" max="8" step="0.05" value="0">
+              </div>
+            </div>
+            <div class="pitch-bend-buttons">
+              <button class="pitch-bend-btn" id="deck-a-bend-plus">+</button>
+              <button class="pitch-bend-btn" id="deck-a-bend-minus">-</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Section -->
+        <div class="performance-section">
+          <!-- Mode Selectors -->
+          <div class="pad-modes">
+            <button class="pad-mode-btn active" data-deck="a" data-mode="hotcue">HOT CUE</button>
+            <button class="pad-mode-btn" data-deck="a" data-mode="loop">AUTO LOOP</button>
+            <button class="pad-mode-btn" data-deck="a" data-mode="sampler">SAMPLER</button>
+            <button class="pad-mode-btn" data-deck="a" data-mode="padfx">PAD FX</button>
+          </div>
+          <!-- 8 Pads Grid -->
+          <div class="pads-grid" id="pads-grid-a">
+            <button class="pad pad-color-cyan" data-index="0"><span>CUE 1</span><span class="pad-sub">1</span></button>
+            <button class="pad pad-color-cyan" data-index="1"><span>CUE 2</span><span class="pad-sub">2</span></button>
+            <button class="pad pad-color-cyan" data-index="2"><span>CUE 3</span><span class="pad-sub">3</span></button>
+            <button class="pad pad-color-cyan" data-index="3"><span>CUE 4</span><span class="pad-sub">4</span></button>
+            <button class="pad pad-color-cyan" data-index="4"><span>CUE 5</span><span class="pad-sub">Q</span></button>
+            <button class="pad pad-color-cyan" data-index="5"><span>CUE 6</span><span class="pad-sub">W</span></button>
+            <button class="pad pad-color-cyan" data-index="6"><span>CUE 7</span><span class="pad-sub">E</span></button>
+            <button class="pad pad-color-cyan" data-index="7"><span>CUE 8</span><span class="pad-sub">R</span></button>
+          </div>
+        </div>
+
+        <!-- Transport Controls -->
+        <div class="transport-section">
+          <div class="sync-grid">
+            <button class="sync-btn" id="deck-a-sync" title="Match BPM to other Deck">SYNC</button>
+            <div class="deck-status-led" id="deck-a-status-led"></div>
+          </div>
+          <div class="main-transport">
+            <button class="cue-btn" id="deck-a-cue" title="Cue Point (C)">CUE</button>
+            <button class="play-btn" id="deck-a-play" title="Play / Pause (Space)">
+              <svg class="play-icon" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg class="pause-icon hidden" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTER MIXER (CHANNELS & CROSSFADER) -->
+      <section class="mixer" id="mixer-container">
+        <!-- EQ & Gain knobs for Channel A & B -->
+        <div class="mixer-channels">
+          
+          <!-- Channel A Strip -->
+          <div class="mixer-channel-strip channel-a">
+            <!-- Gain / Trim -->
+            <div class="knob-node">
+              <span class="knob-name">TRIM</span>
+              <div class="knob-wrapper" data-control="gain-a">
+                <div class="knob" id="deck-a-trim" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-a-trim-val">100%</span>
+            </div>
+
+            <!-- 3-Band EQ Knobs -->
+            <div class="knob-node">
+              <span class="knob-name">HI</span>
+              <div class="knob-wrapper" data-control="eq-hi-a">
+                <div class="knob" id="deck-a-hi" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-a-hi-val">0 dB</span>
+            </div>
+
+            <div class="knob-node">
+              <span class="knob-name">MID</span>
+              <div class="knob-wrapper" data-control="eq-mid-a">
+                <div class="knob" id="deck-a-mid" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-a-mid-val">0 dB</span>
+            </div>
+
+            <div class="knob-node">
+              <span class="knob-name">LOW</span>
+              <div class="knob-wrapper" data-control="eq-low-a">
+                <div class="knob" id="deck-a-low" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-a-low-val">0 dB</span>
+            </div>
+
+            <!-- Sound Color Filter Knob -->
+            <div class="knob-node color-filter-node">
+              <span class="knob-name">FILTER</span>
+              <div class="knob-wrapper filter-knob" data-control="filter-a">
+                <div class="knob" id="deck-a-filter" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-a-filter-val">OFF</span>
+            </div>
+
+            <!-- Cue Button (Monitor) -->
+            <button class="cue-monitor-btn" id="deck-a-cue-mon" title="Headphone cue deck A">CUE A</button>
+
+            <!-- Channel Volume Fader -->
+            <div class="channel-fader-container">
+              <div class="fader-scale">
+                <span>10</span>
+                <span>7</span>
+                <span>5</span>
+                <span>3</span>
+                <span>0</span>
+              </div>
+              <div class="fader-groove">
+                <input type="range" id="deck-a-vol" class="channel-volume-input" min="0" max="1" step="0.01" value="0.8">
+              </div>
+            </div>
+          </div>
+
+          <!-- Central Level Meters -->
+          <div class="vu-meters-container">
+            <div class="vu-meter-column">
+              <div class="vu-meter-leds" id="vu-meter-a">
+                <!-- Javascript will light up segments -->
+                <div class="vu-led red"></div>
+                <div class="vu-led red"></div>
+                <div class="vu-led orange"></div>
+                <div class="vu-led orange"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+              </div>
+            </div>
+            <div class="vu-meters-label">LEVEL</div>
+            <div class="vu-meter-column">
+              <div class="vu-meter-leds" id="vu-meter-b">
+                <div class="vu-led red"></div>
+                <div class="vu-led red"></div>
+                <div class="vu-led orange"></div>
+                <div class="vu-led orange"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+                <div class="vu-led green"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Channel B Strip -->
+          <div class="mixer-channel-strip channel-b">
+            <!-- Gain / Trim -->
+            <div class="knob-node">
+              <span class="knob-name">TRIM</span>
+              <div class="knob-wrapper" data-control="gain-b">
+                <div class="knob" id="deck-b-trim" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-b-trim-val">100%</span>
+            </div>
+
+            <!-- 3-Band EQ Knobs -->
+            <div class="knob-node">
+              <span class="knob-name">HI</span>
+              <div class="knob-wrapper" data-control="eq-hi-b">
+                <div class="knob" id="deck-b-hi" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-b-hi-val">0 dB</span>
+            </div>
+
+            <div class="knob-node">
+              <span class="knob-name">MID</span>
+              <div class="knob-wrapper" data-control="eq-mid-b">
+                <div class="knob" id="deck-b-mid" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-b-mid-val">0 dB</span>
+            </div>
+
+            <div class="knob-node">
+              <span class="knob-name">LOW</span>
+              <div class="knob-wrapper" data-control="eq-low-b">
+                <div class="knob" id="deck-b-low" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-b-low-val">0 dB</span>
+            </div>
+
+            <!-- Sound Color Filter Knob -->
+            <div class="knob-node color-filter-node">
+              <span class="knob-name">FILTER</span>
+              <div class="knob-wrapper filter-knob" data-control="filter-b">
+                <div class="knob" id="deck-b-filter" style="transform: rotate(0deg);"></div>
+              </div>
+              <span class="knob-val-text" id="deck-b-filter-val">OFF</span>
+            </div>
+
+            <!-- Cue Button (Monitor) -->
+            <button class="cue-monitor-btn" id="deck-b-cue-mon" title="Headphone cue deck B">CUE B</button>
+
+            <!-- Channel Volume Fader -->
+            <div class="channel-fader-container">
+              <div class="fader-scale">
+                <span>10</span>
+                <span>7</span>
+                <span>5</span>
+                <span>3</span>
+                <span>0</span>
+              </div>
+              <div class="fader-groove">
+                <input type="range" id="deck-b-vol" class="channel-volume-input" min="0" max="1" step="0.01" value="0.8">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crossfader Section -->
+        <div class="crossfader-area">
+          <div class="crossfader-labels">
+            <span>A</span>
+            <span>MIXER CURVE</span>
+            <span>B</span>
+          </div>
+          <div class="crossfader-groove">
+            <input type="range" id="crossfader" min="-1" max="1" step="0.02" value="0">
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT DECK (DECK B) -->
+      <section class="deck deck-b" id="deck-b-container">
+        <!-- Deck Header Status -->
+        <div class="deck-display">
+          <div class="track-meta">
+            <div class="track-title" id="deck-b-title">Load a Track...</div>
+            <div class="track-artist" id="deck-b-artist">Deck B</div>
+          </div>
+          <div class="digital-readout">
+            <div class="readout-item">
+              <span class="readout-title">BPM</span>
+              <span class="readout-val" id="deck-b-bpm">128.00</span>
+            </div>
+            <div class="readout-item">
+              <span class="readout-title">TIME</span>
+              <span class="readout-val font-mono" id="deck-b-time">00:00.0</span>
+            </div>
+            <div class="readout-item">
+              <span class="readout-title">PITCH</span>
+              <span class="readout-val font-mono" id="deck-b-pitch-val">+0.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="deck-deck-controls">
+          <!-- Jog Wheel Platter Area -->
+          <div class="jog-wheel-outer">
+            <div class="jog-wheel" id="jog-wheel-b">
+              <div class="jog-vinyl-lines"></div>
+              <div class="jog-center">
+                <div class="jog-marker" id="jog-marker-b"></div>
+                <div class="jog-center-display">
+                  <div class="jog-bpm-sub" id="jog-b-bpm-readout">128</div>
+                  <div class="jog-deck-id">B</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pitch Fader & Key Lock Section -->
+          <div class="pitch-column">
+            <div class="keylock-btn-container">
+              <button class="keylock-btn" id="deck-b-keylock" title="Key Lock / Master Tempo">MT</button>
+            </div>
+            <div class="pitch-fader-container">
+              <div class="pitch-scale">
+                <span>+8</span>
+                <span>+4</span>
+                <span>0</span>
+                <span>-4</span>
+                <span>-8</span>
+              </div>
+              <div class="fader-track">
+                <input type="range" id="deck-b-pitch" class="pitch-fader-input" min="-8" max="8" step="0.05" value="0">
+              </div>
+            </div>
+            <div class="pitch-bend-buttons">
+              <button class="pitch-bend-btn" id="deck-b-bend-plus">+</button>
+              <button class="pitch-bend-btn" id="deck-b-bend-minus">-</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Section -->
+        <div class="performance-section">
+          <!-- Mode Selectors -->
+          <div class="pad-modes">
+            <button class="pad-mode-btn active" data-deck="b" data-mode="hotcue">HOT CUE</button>
+            <button class="pad-mode-btn" data-deck="b" data-mode="loop">AUTO LOOP</button>
+            <button class="pad-mode-btn" data-deck="b" data-mode="sampler">SAMPLER</button>
+            <button class="pad-mode-btn" data-deck="b" data-mode="padfx">PAD FX</button>
+          </div>
+          <!-- 8 Pads Grid -->
+          <div class="pads-grid" id="pads-grid-b">
+            <button class="pad pad-color-magenta" data-index="0"><span>CUE 1</span><span class="pad-sub">7</span></button>
+            <button class="pad pad-color-magenta" data-index="1"><span>CUE 2</span><span class="pad-sub">8</span></button>
+            <button class="pad pad-color-magenta" data-index="2"><span>CUE 3</span><span class="pad-sub">9</span></button>
+            <button class="pad pad-color-magenta" data-index="3"><span>CUE 4</span><span class="pad-sub">0</span></button>
+            <button class="pad pad-color-magenta" data-index="4"><span>CUE 5</span><span class="pad-sub">U</span></button>
+            <button class="pad pad-color-magenta" data-index="5"><span>CUE 6</span><span class="pad-sub">I</span></button>
+            <button class="pad pad-color-magenta" data-index="6"><span>CUE 7</span><span class="pad-sub">O</span></button>
+            <button class="pad pad-color-magenta" data-index="7"><span>CUE 8</span><span class="pad-sub">P</span></button>
+          </div>
+        </div>
+
+        <!-- Transport Controls -->
+        <div class="transport-section">
+          <div class="sync-grid">
+            <button class="sync-btn" id="deck-b-sync" title="Match BPM to other Deck">SYNC</button>
+            <div class="deck-status-led" id="deck-b-status-led"></div>
+          </div>
+          <div class="main-transport">
+            <button class="cue-btn" id="deck-b-cue" title="Cue Point (K)">CUE</button>
+            <button class="play-btn" id="deck-b-play" title="Play / Pause (Enter)">
+              <svg class="play-icon" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg class="pause-icon hidden" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- LIBRARY & TRACK BROWSER -->
+    <footer class="dj-library">
+      <div class="library-left">
+        <h3 class="section-title">BUILT-IN MUSIC LOOPS (SYNTHESIZED LIVE)</h3>
+        <div class="track-presets">
+          <div class="track-row" data-track-id="synthwave" data-bpm="120">
+            <div class="row-cell play-cell">⚡</div>
+            <div class="row-cell text-cell">
+              <span class="t-title">Retro Synthwave Groove</span>
+              <span class="t-artist">LABO Synth System</span>
+            </div>
+            <div class="row-cell bpm-cell">120 BPM</div>
+            <div class="row-cell load-cell">
+              <button class="load-btn load-a" data-deck="a">LOAD A</button>
+              <button class="load-btn load-b" data-deck="b">LOAD B</button>
+            </div>
+          </div>
+
+          <div class="track-row" data-track-id="house" data-bpm="125">
+            <div class="row-cell play-cell">⚡</div>
+            <div class="row-cell text-cell">
+              <span class="t-title">Deep Club House</span>
+              <span class="t-artist">LABO Beat Gen</span>
+            </div>
+            <div class="row-cell bpm-cell">125 BPM</div>
+            <div class="row-cell load-cell">
+              <button class="load-btn load-a" data-deck="a">LOAD A</button>
+              <button class="load-btn load-b" data-deck="b">LOAD B</button>
+            </div>
+          </div>
+
+          <div class="track-row" data-track-id="techno" data-bpm="130">
+            <div class="row-cell play-cell">⚡</div>
+            <div class="row-cell text-cell">
+              <span class="t-title">Warehouse Acid Techno</span>
+              <span class="t-artist">LABO Acid Osc</span>
+            </div>
+            <div class="row-cell bpm-cell">130 BPM</div>
+            <div class="row-cell load-cell">
+              <button class="load-btn load-a" data-deck="a">LOAD A</button>
+              <button class="load-btn load-b" data-deck="b">LOAD B</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="library-right">
+        <h3 class="section-title">DRAG & DROP CUSTOM AUDIO FILES</h3>
+        <div class="file-uploader" id="drop-zone">
+          <div class="upload-icon">📁</div>
+          <p class="upload-text">Drag & Drop MP3, WAV or M4A tracks here</p>
+          <p class="upload-sub">Or click to select files from your computer</p>
+          <input type="file" id="file-input" accept="audio/*" multiple class="hidden">
+          <div class="loader-bars" id="audio-decoder-loader">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <span>Decoding Track...</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- KEYMAP INFO MODAL OVERLAY -->
+  <div id="shortcuts-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>⌨️ HARDWARE KEYBOARD MAPPINGS</h2>
+        <button class="close-modal-btn" id="close-shortcuts-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="keymap-grid">
+          
+          <div class="keymap-column">
+            <h3>🎛️ DECK A (LEFT)</h3>
+            <ul>
+              <li><span class="key-badge">Space</span> Play / Pause</li>
+              <li><span class="key-badge">C</span> Cue Point (Set or Hold)</li>
+              <li><span class="key-badge">S</span> Beat Sync</li>
+              <li><span class="key-badge">1</span> - <span class="key-badge">4</span> Performance Pads 1-4</li>
+              <li><span class="key-badge">Q</span>, <span class="key-badge">W</span>, <span class="key-badge">E</span>, <span class="key-badge">R</span> Performance Pads 5-8</li>
+              <li><span class="key-badge">Shift + Q</span> Pitch Bend -</li>
+              <li><span class="key-badge">Shift + W</span> Pitch Bend +</li>
+            </ul>
+          </div>
+
+          <div class="keymap-column">
+            <h3>🎛️ DECK B (RIGHT)</h3>
+            <ul>
+              <li><span class="key-badge">Enter</span> Play / Pause</li>
+              <li><span class="key-badge">K</span> Cue Point (Set or Hold)</li>
+              <li><span class="key-badge">L</span> Beat Sync</li>
+              <li><span class="key-badge">7</span> - <span class="key-badge">0</span> Performance Pads 1-4</li>
+              <li><span class="key-badge">U</span>, <span class="key-badge">I</span>, <span class="key-badge">O</span>, <span class="key-badge">P</span> Performance Pads 5-8</li>
+              <li><span class="key-badge">Shift + U</span> Pitch Bend -</li>
+              <li><span class="key-badge">Shift + I</span> Pitch Bend +</li>
+            </ul>
+          </div>
+
+          <div class="keymap-column full-width">
+            <h3>🎚️ MIXER & GENERAL</h3>
+            <ul>
+              <li><span class="key-badge">&larr;</span> / <span class="key-badge">&rarr;</span> Nudge Crossfader Left / Right</li>
+              <li><span class="key-badge">Down Arrow</span> Reset Crossfader to Center (50/50 mix)</li>
+              <li><span class="key-badge">A</span>, <span class="key-badge">D</span> Headphone Source Select (Cue A / Cue B / Master)</li>
+              <li><span class="key-badge">Drag Knobs</span> Click & Drag mouse vertically on EQs/Filters to adjust!</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
