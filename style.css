@@ -106,7 +106,7 @@ body {
   font-size: 3.5rem;
   font-weight: 900;
   letter-spacing: 6px;
-  background: linear-gradient(90deg, var(--deck-a-color) 0%, var(--deck-b-color) 100%);
+  background: white;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 25px;
@@ -124,7 +124,7 @@ body {
 
 .welcome-loader {
   font-family: var(--font-mono);
-  color: var(--mixer-color);
+  color: grey;
   margin-bottom: 35px;
   font-size: 0.95rem;
 }
@@ -150,8 +150,8 @@ body {
   font-size: 1.1rem;
   letter-spacing: 2px;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
+  background: rgb(181, 157, 103);
+  border: 1px solid grey;
   border-radius: 8px;
   padding: 18px 36px;
   width: 100%;
@@ -161,17 +161,17 @@ body {
 }
 
 .welcome-btn.active {
-  background: linear-gradient(90deg, var(--deck-a-color) 0%, var(--deck-b-color) 100%);
-  color: #050608;
+  background: rgb(181, 157, 103);
+  color: black;
   cursor: pointer;
   opacity: 1;
   border: none;
-  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 10px rgb(186, 186, 186);
 }
 
 .welcome-btn.active:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(255, 0, 127, 0.5);
+  box-shadow:0 0 10px rgb(186, 186, 186);
 }
 
 .welcome-btn.active:active {
@@ -237,7 +237,7 @@ body {
 
 /* Waveforms container */
 .waveform-monitor {
-  background: #040508;
+  background: #393939;
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   overflow: hidden;
