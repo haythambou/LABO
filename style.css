@@ -13,25 +13,25 @@
   --border-color: #242a36;
   --border-soft: rgba(255, 255, 255, 0.03);
   --border-accent: #2d3545;
-  
+
   /* Accent Colors - Professional Hardware Tones */
   --deck-a-color: #4cb5b9;
   --deck-a-dim: rgba(76, 181, 185, 0.15);
   --deck-a-solid: #3a9195;
   --deck-a-hover: #5dc9cd;
   --deck-a-active: #68d5d9;
-  
+
   --deck-b-color: #b84d7a;
   --deck-b-dim: rgba(184, 77, 122, 0.15);
   --deck-b-solid: #943c62;
   --deck-b-hover: #c95d8c;
   --deck-b-active: #d46898;
-  
+
   --mixer-color: #c2945a;
   --mixer-dim: rgba(194, 148, 90, 0.18);
   --mixer-hover: #cfa56a;
   --mixer-active: #d4af78;
-  
+
   /* Status LEDs */
   --led-green: #4caf7a;
   --led-green-dim: rgba(76, 175, 122, 0.5);
@@ -40,16 +40,16 @@
   --led-red: #b8453a;
   --led-red-dim: rgba(184, 69, 58, 0.5);
   --led-off: #1a1e28;
-  
+
   /* Typography */
   --text-main: #d4d8e0;
   --text-bright: #e8ebf2;
   --text-muted: #6b7284;
   --text-dim: #4a5062;
-  
+
   --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'Share Tech Mono', 'SF Mono', 'Cascadia Code', monospace;
-  
+
   /* Radii */
   --radius-xs: 3px;
   --radius-sm: 5px;
@@ -57,7 +57,7 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-2xl: 20px;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -65,12 +65,51 @@
   --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.55);
   --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-inset-deep: inset 0 2px 6px rgba(0, 0, 0, 0.7);
-  
+
   /* Transitions */
   --ease-fast: 150ms cubic-bezier(0.23, 1, 0.32, 1);
   --ease-smooth: 200ms cubic-bezier(0.23, 1, 0.32, 1);
   --ease-slow: 280ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Theme */
+  --theme-shadow-color: rgba(0, 0, 0, 0.55);
 }
+
+[data-theme="light"] {
+  --bg-main: #f6f7fb;
+  --bg-chassis: #eef1f8;
+  --bg-panel: #ffffff;
+  --bg-panel-light: #f3f5fb;
+  --bg-surface: #f0f3fa;
+  --border-color: rgba(15, 23, 42, 0.12);
+  --border-soft: rgba(15, 23, 42, 0.06);
+  --border-accent: rgba(15, 23, 42, 0.18);
+
+  --led-off: rgba(15, 23, 42, 0.15);
+
+  --text-main: #0b1020;
+  --text-bright: #0b1020;
+  --text-muted: rgba(11, 16, 32, 0.62);
+  --text-dim: rgba(11, 16, 32, 0.48);
+
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.12);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.14);
+  --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.18);
+  --shadow-xl: 0 12px 32px rgba(15, 23, 42, 0.22);
+  --shadow-inset: inset 0 1px 2px rgba(15, 23, 42, 0.12);
+  --shadow-inset-deep: inset 0 2px 6px rgba(15, 23, 42, 0.15);
+  --theme-shadow-color: rgba(15, 23, 42, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 
 /* ==========================================================
    GLOBAL RESET
@@ -98,14 +137,24 @@ body {
   justify-content: center;
   align-items: flex-start;
   overflow-x: hidden;
-  background-image: 
+
+  background-image:
     radial-gradient(ellipse at 50% 0%, rgba(20, 23, 31, 0.9) 0%, transparent 60%),
     radial-gradient(ellipse at 0% 85%, rgba(76, 181, 185, 0.025) 0%, transparent 50%),
     radial-gradient(ellipse at 100% 85%, rgba(184, 77, 122, 0.025) 0%, transparent 50%);
+
   background-attachment: fixed;
   padding: 20px 14px;
   line-height: 1.5;
 }
+
+html[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.95) 0%, transparent 58%),
+    radial-gradient(ellipse at 0% 85%, rgba(76, 181, 185, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 85%, rgba(184, 77, 122, 0.08) 0%, transparent 50%);
+}
+
 
 .dj-container {
   width: 100%;

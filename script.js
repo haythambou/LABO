@@ -1290,51 +1290,75 @@ class DJDeck {
 /* ==========================================================================
    VU LEVEL METER RENDERING
    ========================================================================== */
+// VU meter smoothing/decay state (makes it feel less robotic)
+const vuState = {
+  a: { currentLit: 0, targetLit: 0 },
+  b: { currentLit: 0, targetLit: 0 }
+};
+
 function updateVUMeters() {
   if (!audioCtx) {
     requestAnimationFrame(updateVUMeters);
     return;
   }
 
-  const renderDeckVU = (deck, meterId) => {
-    if (!deck || !deck.isPlaying) {
-      // Fade down leds if deck is not playing
-      const leds = document.querySelectorAll(`#${meterId} .vu-led`);
-      leds.forEach(l => l.classList.remove('lit'));
-      return;
-    }
-
-    const dataArray = new Uint8Array(deck.analyser.frequencyBinCount);
-    deck.analyser.getByteFrequencyData(dataArray);
-
-    // Calculate average amplitude
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      sum += dataArray[i];
-    }
-    const average = sum / dataArray.length;
-    
-    // Scale to meter LED count (10 segments)
-    const factor = deck.volNode.gain.value; // scale by volume slider
-    const litCount = Math.min(10, Math.round((average / 110) * factor * 10));
-
+  const renderDeckVU = (deck, meterId, stateKey) => {
     const leds = document.querySelectorAll(`#${meterId} .vu-led`);
-    // LEDs are arranged top-to-bottom in DOM (index 0 is top red, index 9 is bottom green)
+    if (!deck || !deck.analyser || leds.length === 0) return;
+
+    // Use (and reuse) a buffer per deck to avoid allocations in the hot path
+    if (!deck.__vuDataArray) {
+      deck.__vuDataArray = new Uint8Array(deck.analyser.frequencyBinCount);
+    }
+
+    // Determine target level from current analyser
+    if (!deck.isPlaying) {
+      vuState[stateKey].targetLit = 0;
+    } else {
+      deck.analyser.getByteFrequencyData(deck.__vuDataArray);
+
+      let sum = 0;
+      for (let i = 0; i < deck.__vuDataArray.length; i++) sum += deck.__vuDataArray[i];
+      const average = sum / deck.__vuDataArray.length;
+
+      const factor = deck.volNode.gain.value; // scale by volume slider
+      let litCount = Math.min(10, Math.round((average / 110) * factor * 10));
+
+      // Tiny natural flicker so it doesn't look mathematically perfect
+      const flicker = (Math.random() - 0.5) * 0.25; // +/-0.125
+      litCount = Math.max(0, Math.min(10, Math.round(litCount + flicker)));
+
+      vuState[stateKey].targetLit = litCount;
+    }
+
+    // Smooth movement: fast attack, slower release
+    const cur = vuState[stateKey].currentLit;
+    const target = vuState[stateKey].targetLit;
+
+    const attackRate = 0.28; // how quickly it rises
+    const releaseRate = 0.14; // how quickly it falls
+
+    const delta = target - cur;
+    let next;
+    if (delta > 0) next = cur + delta * attackRate;
+    else next = cur + delta * releaseRate;
+
+    vuState[stateKey].currentLit = next;
+
+    const effectiveLit = Math.max(0, Math.min(10, Math.round(next)));
+
     leds.forEach((led, idx) => {
-      // 10 - idx is led rank (1 to 10)
-      if (10 - idx <= litCount) {
-        led.classList.add('lit');
-      } else {
-        led.classList.remove('lit');
-      }
+      if (10 - idx <= effectiveLit) led.classList.add('lit');
+      else led.classList.remove('lit');
     });
   };
 
-  renderDeckVU(deckA, 'vu-meter-a');
-  renderDeckVU(deckB, 'vu-meter-b');
+  renderDeckVU(deckA, 'vu-meter-a', 'a');
+  renderDeckVU(deckB, 'vu-meter-b', 'b');
 
   requestAnimationFrame(updateVUMeters);
 }
+
 
 
 /* ==========================================================================
@@ -2299,7 +2323,32 @@ function updateDeckDigitalTimeText(deckKey, time) {
 document.addEventListener('DOMContentLoaded', () => {
   const welcome = document.getElementById('welcome-screen');
   const startBtn = document.getElementById('start-dj-btn');
-  
+
+  // Theme: apply persisted choice or system preference
+  const themeKey = 'labo-theme';
+  const applyTheme = (theme) => {
+    const root = document.documentElement;
+    if (!theme || theme === 'dark') {
+      root.removeAttribute('data-theme');
+      return;
+    }
+    root.setAttribute('data-theme', theme);
+  };
+
+  const savedTheme = localStorage.getItem(themeKey);
+  const systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  applyTheme(savedTheme || systemTheme);
+
+  // Track system preference changes only when user hasn't explicitly chosen a theme
+  if (!savedTheme && window.matchMedia) {
+    const mql = window.matchMedia('(prefers-color-scheme: light)');
+    mql.addEventListener('change', (ev) => {
+      const next = ev.matches ? 'light' : 'dark';
+      applyTheme(next);
+    });
+  }
+
+
   // Start compiling synthesis loops instantly in background
   const initCompilation = () => {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -2307,8 +2356,9 @@ document.addEventListener('DOMContentLoaded', () => {
     testCtx.close(); // just to prime page compilation safely
     compileSynthTracks();
   };
-  
+
   initCompilation();
+
 
   startBtn.addEventListener('click', () => {
     // Check if compilation finished (button is active)
@@ -2321,8 +2371,36 @@ document.addEventListener('DOMContentLoaded', () => {
     welcome.classList.add('hidden');
   });
 
+  // Theme toggle
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const themeToggleLabel = document.getElementById('theme-toggle-label');
+  if (themeToggleBtn) {
+    const current = document.documentElement.getAttribute('data-theme');
+    const currentTheme = current ? current : 'dark';
+    if (themeToggleLabel) themeToggleLabel.innerText = currentTheme === 'dark' ? 'THEME' : 'THEME';
+
+    themeToggleBtn.addEventListener('click', () => {
+      const root = document.documentElement;
+      const nowTheme = root.getAttribute('data-theme');
+      const nextTheme = nowTheme === 'light' ? 'dark' : 'light';
+      applyTheme(nextTheme);
+      localStorage.setItem(themeKey, nextTheme);
+
+      // Optional: update label for clarity without changing layout
+      if (themeToggleLabel) {
+        themeToggleLabel.innerText = nextTheme === 'light' ? 'LIGHT' : 'DARK';
+      }
+    });
+
+    // Initialize label
+    if (themeToggleLabel) {
+      themeToggleLabel.innerText = currentTheme === 'light' ? 'LIGHT' : 'DARK';
+    }
+  }
+
   // Keyboard mapping Modal Popup toggles
   const shortcutsBtn = document.getElementById('shortcuts-toggle-btn');
+
   const shortcutsModal = document.getElementById('shortcuts-modal');
   const closeModalBtn = document.getElementById('close-shortcuts-btn');
 
